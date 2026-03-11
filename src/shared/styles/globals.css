@@ -1,0 +1,130 @@
+/* shared/styles/globals.css */
+
+/* ── Dark Mode (default — social media biasanya dark-first) ── */
+:root {
+  /* Background Layer */
+  --color-bg:          #0f172a;
+  --color-surface:     #111c2d;
+  --color-elevated:    #162338;
+  --color-overlay:     #1c2b45;
+  --color-border:      #233554;
+  --color-border-sub:  #1b2a44;
+
+  /* Text */
+  --color-text-primary:   #e6edf7;
+  --color-text-secondary: #9fb3d9;
+  --color-text-muted:     #6f86ad;
+  --color-text-subtle:    #4c5f85;
+
+  /* Inputs */
+  --color-input-bg:     #111c2d;
+  --color-input-border: #233554;
+
+  /* Avatar */
+  --color-avatar-bg:   #162338;
+  --color-avatar-text: #9fb3d9;
+
+  /* Overlay */
+  --color-overlay-modal: rgba(10, 20, 40, 0.75);
+
+  /* Shadows */
+  --shadow-sm:   0 1px 3px 0 rgb(0 10 30 / 0.4);
+  --shadow-md:   0 4px 12px -2px rgb(0 10 30 / 0.5);
+  --shadow-lg:   0 8px 24px -4px rgb(0 10 30 / 0.6);
+  --shadow-glow: 0 0 20px rgb(19 127 236 / 0.18);
+
+  /* Gradients */
+  --gradient-brand:      linear-gradient(135deg, #137fec 0%, #6366f1 100%);
+  --gradient-brand-soft: linear-gradient(135deg, #137fec18 0%, #6366f110 100%);
+  --gradient-card:       linear-gradient(145deg, #162338 0%, #111c2d 100%);
+
+  /* Brand */
+  --color-brand:       #137fec;
+  --color-brand-hover: #0d66c2;
+
+  /* States */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error:   #f43f5e;
+
+  --color-like:     #f43f5e;
+  --color-repost:   #10b981;
+  --color-bookmark: #f59e0b;
+}
+
+/* ── Light Mode ───────────────────────────────────────────── */
+html.light {
+  --color-bg:          #f4f6fb;
+  --color-surface:     #ffffff;
+  --color-elevated:    #ffffff;
+  --color-overlay:     #eef2f9;
+  --color-border:      #dde3f0;
+  --color-border-sub:  #eaeff8;
+
+  --color-text-primary:   #0d1b2e;
+  --color-text-secondary: #3d5273;
+  --color-text-muted:     #7390b0;
+  --color-text-subtle:    #a8bdd4;
+
+  --color-input-bg:     #ffffff;
+  --color-input-border: #dde3f0;
+
+  --color-avatar-bg:   #eef2f9;
+  --color-avatar-text: #3d5273;
+
+  --color-overlay-modal: rgba(13, 27, 46, 0.5);
+
+  --shadow-sm:   0 1px 3px 0 rgb(13 27 46 / 0.06);
+  --shadow-md:   0 4px 12px -2px rgb(13 27 46 / 0.08);
+  --shadow-lg:   0 8px 24px -4px rgb(13 27 46 / 0.10);
+  --shadow-glow: 0 0 20px rgb(19 127 236 / 0.12);
+
+  --gradient-brand:      linear-gradient(135deg, #137fec 0%, #6366f1 100%);
+  --gradient-brand-soft: linear-gradient(135deg, #137fec12 0%, #6366f10a 100%);
+  --gradient-card:       linear-gradient(145deg, #ffffff 0%, #f4f6fb 100%);
+}
+
+/* ── Base ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 5px; }
+::-webkit-scrollbar-track { background: var(--color-bg); }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
+
+/* ── Selection ────────────────────────────────────────────── */
+::selection {
+  background-color: rgb(19 127 236 / 0.25);
+  color: var(--color-text-primary);
+}
+
+/* ── Utility classes ──────────────────────────────────────── */
+
+/* Teks dengan gradient brand */
+.text-gradient-brand {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Efek glow di card/avatar */
+.glow-brand {
+  box-shadow: var(--shadow-glow);
+}
+
+/* Card dengan gradient surface */
+.surface-card {
+  background: var(--gradient-card);
+  border: 1px solid var(--color-border);
+}

@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    /* Language and Environment */
+    "target": "ES2023",
+    "module": "commonjs",
+    "lib": ["ES2023"],
+
+    /* Project Structure */
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    /* Strict Type Checking */
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* Module Resolution */
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+
+    /* Performance */
+    "skipLibCheck": true
+  },
+
+  "include": [
+    "src/**/*"
+  ],
+
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

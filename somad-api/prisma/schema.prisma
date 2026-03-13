@@ -1,0 +1,303 @@
+// ============================================================
+//  SOMAD — Social Media Platform
+//  Prisma Schema
+//  Updated: tambah fitur media, hashtag, bookmark,
+//           notifikasi, DM, reply/repost, akun private
+// ============================================================
+
+generator client {
+  provider = "prisma-client"
+  output = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum FollowStatus {
+  PENDING   // menunggu approval (akun private)
+  ACCEPTED  // sudah diterima
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  GIF
+}
+
+enum NotificationType {
+  LIKE
+  FOLLOW
+  REPLY
+  REPOST
+  MENTION
+}
+
+// ============================================================
+// USER
+// ============================================================
+
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  username       String   @unique
+  name           String
+  password       String
+  bio            String?
+  avatarUrl      String?
+  coverUrl       String?
+
+  // [NEW] Fitur akun & statistik
+  isVerified     Boolean  @default(false)
+  isPrivate      Boolean  @default(false)
+  followerCount  Int      @default(0)
+  followingCount Int      @default(0)
+  postCount      Int      @default(0)
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relasi — tetap sama
+  posts          Post[]
+  comments       Comment[]
+  likes          Like[]
+  refreshTokens  RefreshToken[]
+
+  // Relasi follow (nama relasi tidak diubah agar migrasi aman)
+  followers      Follow[] @relation("following") // user lain yang follow saya
+  following      Follow[] @relation("follower")  // user yang saya follow
+
+  // [NEW] Relasi fitur baru
+  bookmarks           Bookmark[]
+  sentMessages        DirectMessage[] @relation("SentMessages")
+  receivedMessages    DirectMessage[] @relation("ReceivedMessages")
+  notifications       Notification[]  @relation("ReceivedNotifications")
+  actedNotifications  Notification[]  @relation("ActorNotifications")
+}
+
+// ============================================================
+// POST
+// ============================================================
+
+model Post {
+  id        String   @id @default(cuid())
+  content   String
+
+  // [DEPRECATED] imageUrl digantikan oleh model Media (multi-image support)
+  // Dibiarkan nullable agar data lama tidak rusak
+  imageUrl  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  // [NEW] Self-referencing — untuk fitur reply dan repost
+  parentId  String?  // jika diisi → ini adalah reply dari post lain
+  parent    Post?    @relation("PostReplies", fields: [parentId], references: [id], onDelete: SetNull)
+  replies   Post[]   @relation("PostReplies")
+
+  repostId  String?  // jika diisi → ini adalah repost dari post lain
+  repostOf  Post?    @relation("PostReposts", fields: [repostId], references: [id], onDelete: SetNull)
+  reposts   Post[]   @relation("PostReposts")
+
+  // [NEW] Counter denormalisasi (update via trigger / background job)
+  likeCount    Int     @default(0)
+  commentCount Int     @default(0)
+  repostCount  Int     @default(0)
+  viewCount    Int     @default(0)
+  isSensitive  Boolean @default(false)
+
+  // Relasi — tetap sama
+  comments  Comment[]
+  likes     Like[]
+
+  // [NEW] Relasi fitur baru
+  media         Media[]
+  bookmarks     Bookmark[]
+  notifications Notification[]
+  hashtags      PostHashtag[]
+
+  // [NEW] Index untuk performa home timeline
+  @@index([authorId, createdAt(sort: Desc)])
+  @@index([parentId])
+}
+
+// ============================================================
+// COMMENT — tidak ada perubahan
+// ============================================================
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================
+// LIKE — tidak ada perubahan
+// ============================================================
+
+model Like {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+}
+
+// ============================================================
+// FOLLOW
+// [CHANGED] Tambah kolom status untuk fitur akun private
+// ============================================================
+
+model Follow {
+  id          String       @id @default(cuid())
+  createdAt   DateTime     @default(now())
+
+  // [NEW] PENDING jika target akun private, ACCEPTED jika akun publik
+  status      FollowStatus @default(ACCEPTED)
+
+  followerId  String
+  follower    User         @relation("follower",  fields: [followerId],  references: [id], onDelete: Cascade)
+
+  followingId String
+  following   User         @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  // [NEW] Index untuk cek siapa saja yang follow seorang user
+  @@index([followingId])
+}
+
+// ============================================================
+// REFRESH TOKEN — tidak ada perubahan
+// ============================================================
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================
+// [NEW] MEDIA — mendukung multi-media per post
+// ============================================================
+
+model Media {
+  id        String    @id @default(cuid())
+  type      MediaType
+  url       String
+  width     Int?
+  height    Int?
+  duration  Int?      // detik, khusus video/gif
+  createdAt DateTime  @default(now())
+
+  postId    String
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================
+// [NEW] HASHTAG + junction table PostHashtag
+// ============================================================
+
+model Hashtag {
+  id        String        @id @default(cuid())
+  name      String        @unique
+  postCount Int           @default(0)
+  createdAt DateTime      @default(now())
+
+  posts     PostHashtag[]
+
+  // Index untuk fitur trending hashtag
+  @@index([postCount(sort: Desc)])
+}
+
+model PostHashtag {
+  postId    String
+  hashtagId String
+
+  post      Post    @relation(fields: [postId],    references: [id], onDelete: Cascade)
+  hashtag   Hashtag @relation(fields: [hashtagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, hashtagId])
+}
+
+// ============================================================
+// [NEW] BOOKMARK
+// ============================================================
+
+model Bookmark {
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([userId, postId])
+}
+
+// ============================================================
+// [NEW] NOTIFICATION
+// ============================================================
+
+model Notification {
+  id          String           @id @default(cuid())
+  type        NotificationType
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+
+  // Siapa yang menerima notifikasi
+  recipientId String
+  recipient   User             @relation("ReceivedNotifications", fields: [recipientId], references: [id], onDelete: Cascade)
+
+  // Siapa yang memicu notifikasi (misal: user yang like, follow, dll.)
+  actorId     String
+  actor       User             @relation("ActorNotifications", fields: [actorId], references: [id], onDelete: Cascade)
+
+  // Post yang terkait (nullable — notif tipe FOLLOW tidak butuh postId)
+  postId      String?
+  post        Post?            @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId, isRead, createdAt(sort: Desc)])
+}
+
+// ============================================================
+// [NEW] DIRECT MESSAGE
+// ============================================================
+
+model DirectMessage {
+  id         String   @id @default(cuid())
+  content    String?
+  mediaUrl   String?
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  senderId   String
+  sender     User     @relation("SentMessages",     fields: [senderId],   references: [id], onDelete: Cascade)
+
+  receiverId String
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([receiverId, createdAt(sort: Desc)])
+}

@@ -1,0 +1,19 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: somad_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: somad_user
+      POSTGRES_PASSWORD: somad_password
+      POSTGRES_DB: somad_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - somad_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  somad_postgres_data:

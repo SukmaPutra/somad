@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.envcls
+
+/src/generated/prisma
+
+/generated/prisma

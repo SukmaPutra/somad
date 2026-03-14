@@ -13,5 +13,10 @@ export const getFeedSchema = z.object({           //z.coerce.number() dipakai ka
   limit: z.coerce.number().min(1).max(50).default(10),
 })
 
+export const postIdSchema = z.object ({
+  id: z.string({error: ' ID post tidak valid'}).cuid('ID post tidak valid'),
+})
+
 export type CreatePostInput = z.infer<typeof createPostSchema>
 export type GetFeedInput = z.infer<typeof getFeedSchema>
+export type PostIdInput = z.infer<typeof postIdSchema>

@@ -67,3 +67,33 @@ export const getAllPosts = async (data: {page:number; limit:number}) => {
     }
   }
 }
+
+export const  getPostById = async (id:string) => {
+  const post = await prisma.post.findUnique({
+    where:{id},
+    select:{
+       id: true,
+      content: true,
+      imageUrl: true,
+      createdAt: true,
+      updatedAt: true,
+      author: {
+        select: { id: true, username: true, name: true, avatarUrl: true }
+      },
+      comments:{
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          content: true,
+          createdAt: true,
+          author: {
+            select: { id: true, username: true, name: true, avatarUrl: true }
+          }
+        }
+      },
+      _count:{select: {likes:true, comments:true}}
+    }
+  })
+
+  return post
+}

@@ -103,3 +103,25 @@ export const deletePost  = async (id:string) => {
     where:{id}
   })
 }
+
+export const toggleLike = async (data:{postId:string; userId:string}) => {
+  const {postId, userId} = data
+
+  const existing = await prisma.like.findUnique({
+    where: {
+      userId_postId: {userId, postId}
+    }
+  })
+
+  if(existing) {
+    await prisma.like.delete({
+      where: {userId_postId: {userId, postId}}
+    })
+    return {like:false, message: 'Like dibatalkan'}
+  } else {
+    await prisma.like.create({
+      data: {userId, postId}
+    })
+    return {liked: true, message: 'Post disukai'}
+  }
+}

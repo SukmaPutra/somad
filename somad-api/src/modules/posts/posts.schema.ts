@@ -8,4 +8,10 @@ export const createPostSchema = z.object({
   imageUrl: z.string().url('URL gambar tidak valid').optional(),
 })
 
+export const getFeedSchema = z.object({           //z.coerce.number() dipakai karena query params selalu berupa string — Zod yang konversi otomatis ke number.
+  page:z.coerce.number().min(1).default(1),
+  limit: z.coerce.number().min(1).max(50).default(10),
+})
+
 export type CreatePostInput = z.infer<typeof createPostSchema>
+export type GetFeedInput = z.infer<typeof getFeedSchema>

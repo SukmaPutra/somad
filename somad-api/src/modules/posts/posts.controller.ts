@@ -1,6 +1,6 @@
 import { Response } from "express";
 import { AuthRequest } from "../../shared/type";
-import { createPostSchema } from "./posts.schema";
+import { createPostSchema, getFeedSchema } from "./posts.schema";
 import * as postService from './posts.service'
 
 export const createPost = async ( req:AuthRequest, res: Response) => {
@@ -22,5 +22,25 @@ export const createPost = async ( req:AuthRequest, res: Response) => {
     res.status(201).json({ message: 'Post berhasil dibuat', post })
   } catch (error: any) {
     res.status(500).json({ message: error.message })
+  }
+}
+
+
+export const getAllPosts = async (req:AuthRequest, res: Response) => {
+  try {
+    const parsed = getFeedSchema.safeParse(req.query)
+    if(!parsed.success) {
+      res.status(400).json({
+        message: parsed.error.issues[0].message
+      })
+      return
+    }
+
+    const result = await postService.getAllPosts(parsed.data)
+    
+    res.status(200).json(result)
+
+  } catch (error:any) {
+    res.status(500).json({message: error.message})
   }
 }

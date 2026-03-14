@@ -97,3 +97,9 @@ export const  getPostById = async (id:string) => {
 
   return post
 }
+
+export const deletePost  = async (id:string) => {
+  await prisma.post.delete({
+    where:{id}
+  })
+}

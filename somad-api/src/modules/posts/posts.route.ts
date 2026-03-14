@@ -7,5 +7,6 @@ const router = Router()
 router.post('/', authenticate, postController.createPost)
 router.get('/', authenticate, postController.getAllPosts)
 router.get('/:id', authenticate, postController.getPostById)
+router.delete('/:id', authenticate, postController.deletePost)
 
 export default router

@@ -17,6 +17,7 @@ export const postIdSchema = z.object ({
   id: z.string({error: ' ID post tidak valid'}).cuid('ID post tidak valid'),
 })
 
+
 export type CreatePostInput = z.infer<typeof createPostSchema>
 export type GetFeedInput = z.infer<typeof getFeedSchema>
 export type PostIdInput = z.infer<typeof postIdSchema>

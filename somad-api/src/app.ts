@@ -4,6 +4,7 @@ import helmet from 'helmet'
 import morgan from 'morgan'
 import authRouter from './modules/auth/auth.route'
 import postRouter from './modules/posts/posts.route'
+import commentRouter from './modules/comments/comments.route'
 
 const app = express()
 
@@ -22,5 +23,6 @@ app.get('/health', (_req, res) => {
 // Routes akan ditambah di sini nanti
 app.use('/api/auth', authRouter)
 app.use('/api/posts', postRouter)
+app.use('/api/posts/:id/comments', commentRouter)
 
 export default app

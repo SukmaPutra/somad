@@ -11,9 +11,12 @@ export const usernameSchema = z.object ({
 export const updateProfileSchema = z.object ({
     name: z.string().min(1).max(50).optional(),
     bio: z.string().max(160, 'Bio maksimal 160 karakter').optional(),
-    avararUrl: z.string().url('URL tidak valid').optional(),
+    avatarUrl: z.string().url('URL tidak valid').optional(),
     coverUrl: z.string().url('URL cover tidak valid').optional(),
-})
+}).refine(
+  (data) => Object.keys(data).length > 0,
+  { message: 'Minimal satu field harus diisi' }
+)
 
 export const userIdSchema = z.object ({
     id: z.string().cuid('ID user tidak valid'),

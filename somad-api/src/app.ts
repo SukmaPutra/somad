@@ -5,6 +5,7 @@ import morgan from 'morgan'
 import authRouter from './modules/auth/auth.route'
 import postRouter from './modules/posts/posts.route'
 import commentRouter from './modules/comments/comments.route'
+import userRouter from './modules/users/users.route'
 
 const app = express()
 
@@ -24,6 +25,7 @@ app.get('/health', (_req, res) => {
 app.use('/api/auth', authRouter)
 app.use('/api/posts', postRouter)
 app.use('/api/posts/:id/comments', commentRouter)
+app.use('/api/users', userRouter)
 
 
 export default app

@@ -22,6 +22,13 @@ export const userIdSchema = z.object ({
     id: z.string().cuid('ID user tidak valid'),
 }) 
 
+// Untuk pagination — dipakai di getUserPosts, getFollowers, getFollowing
+export const paginationSchema = z.object ({
+    page: z.coerce.number().min(1).default(1),
+    limit: z.coerce.number().min(1).max(50).default(10),
+})
+
 export type UsernameInput = z.infer<typeof usernameSchema>
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>
 export type UserIdInput = z.infer<typeof userIdSchema>
+export type PaginationInput = z.infer<typeof paginationSchema>

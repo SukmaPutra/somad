@@ -17,7 +17,7 @@ app.use(express.json())                    // parse JSON body
 app.use(express.urlencoded({ extended: true }))
 
 // Health check — untuk test apakah server jalan
-app.get('/health', (_req, res) => {
+app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 

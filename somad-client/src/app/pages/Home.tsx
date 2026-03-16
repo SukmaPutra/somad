@@ -106,6 +106,7 @@ const MockPostCard = ({ post }: { post: (typeof MOCK_POSTS)[0] }) => (
 
 // ─── Home Page ────────────────────────────────────────────────────────────────
 export const Home = () => {
+
   useDocumentTitle("Somad | Sosial Media Website")
   return (
     <div className="min-h-screen bg-(--color-bg) text-(--color-text-primary)">
@@ -291,3 +292,5 @@ export const Home = () => {
 };
 
 export default Home;
+
+

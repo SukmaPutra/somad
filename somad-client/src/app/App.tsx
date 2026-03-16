@@ -1,6 +1,6 @@
 // src/App.tsx
 import { BrowserRouter } from "react-router-dom";
-import { AuthProvider } from "@/core/context/AuthProvider";
+import { AuthProvider } from "@/features/auth/components/AuthProvider";
 import { AppRoutes } from "@/app/routes";
 import { ThemeProvider } from "@/core/context/ThemeContext";
 

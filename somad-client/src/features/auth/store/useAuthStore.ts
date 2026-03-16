@@ -7,10 +7,9 @@
 
   const initialState: AuthState = {
     user:          null,
-    isLoading:     true,   // true dari awal karena menunggu onAuthStateChanged
+    isLoading:     false,  
     isInitialized: false,
     error:         null,
-    
   };
 
   export const useAuthStore = create<AuthStore>()(

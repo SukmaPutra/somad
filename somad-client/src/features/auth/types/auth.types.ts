@@ -1,54 +1,59 @@
 // features/auth/types/auth.types.ts
-import { Timestamp } from 'firebase/firestore';
 
-// Data user yang tersimpan di Firestore collection 'users'
+// Data user dari Express API
 export interface UserProfile {
-  uid:          string;
-  email:        string;
-  username:     string;
-  displayName:  string;
-  photoURL:     string | null;
-  bio:          string;
-  isVerified:   boolean;
-  isPrivate:    boolean;
+  uid: string;
+  email: string;
+  username: string;
+  name: string;
+  avatarUrl: string | null;
+  coverUrl: string | null;
+  bio: string;
+  isVerified: boolean;
+  createdAt: string;
 
-  // Counter — disimpan di dokumen agar tidak perlu query setiap saat
-  followersCount: number;
-  followingCount: number;
-  postsCount:     number;
-
-  createdAt:  Timestamp;
-  updatedAt:  Timestamp;
+  //counter dari prisma relation
+  _count?: {
+    posts: number;
+    followers: number;
+    following: number;
+  };
 }
 
 // State yang ada di Zustand store
+// isInitialized sekarang artinya: sudah cek localStorage, bukan onAuthStateChanged
 export interface AuthState {
-  user:        UserProfile | null;
-  isLoading:   boolean;
-  isInitialized: boolean; // true setelah onAuthStateChanged pertama kali terpanggil
-  error:       string | null;
+  user: UserProfile | null;
+  isLoading: boolean;
+  isInitialized: boolean;
+  error: string | null;
 }
 
 // Payload untuk form login
 export interface LoginPayload {
-  email:    string;
+  email: string;
   password: string;
 }
 
 // Payload untuk form register
 export interface RegisterPayload {
-  email:       string;
-  password:    string;
-  confirmPassword: string;
-  username:    string;
-  displayName: string;
+  email: string;
+  password: string;
+  username: string;
+  name: string;
 }
 
 // Actions di store
 export interface AuthActions {
-  setUser:          (user: UserProfile | null) => void;
-  setLoading:       (isLoading: boolean) => void;
-  setError:         (error: string | null) => void;
-  setInitialized:   (isInitialized: boolean) => void;
-  clearAuth:        () => void;
+  setUser: (user: UserProfile | null) => void;
+  setLoading: (isLoading: boolean) => void;
+  setError: (error: string | null) => void;
+  setInitialized: (isInitialized: boolean) => void;
+  clearAuth: () => void;
+}
+
+export interface AuthResponse {
+  accessToken: string
+  refreshToken: string
+  user: UserProfile
 }

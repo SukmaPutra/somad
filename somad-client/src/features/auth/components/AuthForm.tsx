@@ -71,9 +71,9 @@ export const RegisterForm = () => {
       <FormField
         label="Nama Tampilan"
         placeholder="Nama Anda"
-        error={errors.displayName?.message}
+        error={errors.name?.message}
         required
-        {...register('displayName')}
+        {...register('name')}
       />
 
       {/* Username */}

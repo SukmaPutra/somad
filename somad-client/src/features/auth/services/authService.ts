@@ -1,104 +1,83 @@
 // features/auth/services/authService.ts
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  User,
-} from 'firebase/auth';
-import {
-  doc,
-  getDoc,
-  setDoc,
-  serverTimestamp,
-  query,
-  collection,
-  where,
-  getDocs,
-} from 'firebase/firestore';
-import { auth, db } from '@/core/api/firebase/firebaseInit';
-import { withFirestore } from '@/core/api/interceptors';
-import { DEFAULT_USER_PROFILE, USERS_COLLECTION } from '../constants/authConstants';
-import type { LoginPayload, RegisterPayload, UserProfile } from '../types/auth.types';
+// import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from "firebase/auth";
+import type { LoginPayload, RegisterPayload, UserProfile, AuthResponse } from "../types/auth.types";
+import apiClient from "@/core/api/client";
 
 // ─── Register ────────────────────────────────────────────────────────────────
 
-export const registerService = async (payload: RegisterPayload) => {
-  return withFirestore(async () => {
-    // 1. Cek apakah username sudah dipakai
-    const usernameQuery = query(
-      collection(db, USERS_COLLECTION),
-      where('username', '==', payload.username.toLowerCase())
-    );
-    const usernameSnap = await getDocs(usernameQuery);
-    if (!usernameSnap.empty) {
-      throw new Error('Username sudah digunakan, coba username lain.');
-    }
+export const registerService = async (payload: RegisterPayload): Promise<UserProfile> => {
+  const respose = await apiClient.post<AuthResponse>('/auth/register', {
+    email: payload.email,
+    password: payload.password,
+    username: payload.username,
+    name: payload.name,
+  })
 
-    // 2. Buat akun di Firebase Auth
-    const credential = await createUserWithEmailAndPassword(
-      auth,
-      payload.email,
-      payload.password
-    );
+  const {accessToken, refreshToken, user} = respose.data
 
-    // 3. Simpan profil user ke Firestore
-    const userProfile: UserProfile = {
-      uid:         credential.user.uid,
-      email:       payload.email,
-      username:    payload.username.toLowerCase(),
-      displayName: payload.displayName,
-      createdAt:   serverTimestamp() as any,
-      updatedAt:   serverTimestamp() as any,
-      ...DEFAULT_USER_PROFILE,
-    };
+  localStorage.setItem('accessToken', accessToken)
+  localStorage.setItem('refreshToken', refreshToken)
 
-    await setDoc(
-      doc(db, USERS_COLLECTION, credential.user.uid),
-      userProfile
-    );
-
-    return userProfile;
-  });
+  return user
+  
 };
 
 // ─── Login ───────────────────────────────────────────────────────────────────
 
-export const loginService = async (payload: LoginPayload) => {
-  return withFirestore(async () => {
-    const credential = await signInWithEmailAndPassword(
-      auth,
-      payload.email,
-      payload.password
-    );
-    return credential.user;
-  });
+export const loginService = async (payload: LoginPayload): Promise<UserProfile> => {
+  const response = await apiClient.post<AuthResponse>('/auth/login', {
+    email: payload.email,
+    password: payload.password,
+  })
+
+  const {accessToken, refreshToken, user} = response.data
+
+  localStorage.setItem('accessToken', accessToken)
+  localStorage.setItem('refreshToken', refreshToken)
+
+  return user
 };
 
 // ─── Logout ──────────────────────────────────────────────────────────────────
 
-export const logoutService = async () => {
-  return withFirestore(async () => {
-    await signOut(auth);
-  });
+export const logoutService = async (): Promise<void> => {
+  try {
+    const refreshToken = localStorage.getItem('refreshToken')
+
+    if(refreshToken) {
+      await apiClient.post('auth/logout', {refreshToken})
+    }
+  } finally {
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+  }
 };
 
-// ─── Get User Profile ────────────────────────────────────────────────────────
+// ─── Get Current User ────────────────────────────────────────────────────────
+// Ambil data user yang sedang login dari Express
 
-export const getUserProfileService = async (uid: string) => {
-  return withFirestore(async () => {
-    const snap = await getDoc(doc(db, USERS_COLLECTION, uid));
-    if (!snap.exists()) throw new Error('Profil tidak ditemukan.');
-    return snap.data() as UserProfile;
-  });
+export const getCurrentUserService = async (): Promise<UserProfile> => {
+  const response = await apiClient.get<{user: UserProfile}>('/auth/me')
+
+  return response.data.user
 };
 
-// ─── Auth State Observer ─────────────────────────────────────────────────────
-// Dipanggil sekali di AuthProvider untuk listen perubahan status login
+// ─── Initialize Auth ─────────────────────────────────────────────────────────
+// Pengganti onAuthStateChanged — dipanggil sekali saat app pertama load
+// Cek apakah ada token di localStorage, kalau ada ambil data user dari server
 
-export const subscribeAuthState = (
-  callback: (user: User | null) => void
-) => {
-  return onAuthStateChanged(auth, callback);
-  // Return value-nya adalah unsubscribe function
+export const initializeAuth = async (): Promise<UserProfile | null> => { 
+  const accessToken = localStorage.getItem('accessToken')
+
+  if(!accessToken) return null
+
+  try {
+    const user = await getCurrentUserService()
+
+    return user
+  } catch {
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+    return null
+  }
 };

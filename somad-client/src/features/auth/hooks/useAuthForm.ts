@@ -20,9 +20,8 @@ export const useRegisterForm = () => {
     defaultValues: {
       email:           '',
       username:        '',
-      displayName:     '',
+      name:     '',
       password:        '',
-      confirmPassword: '',
     },
   });
 };

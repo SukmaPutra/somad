@@ -98,7 +98,7 @@ apiClient.interceptors.response.use(
       processQueue(refreshError, null)
       localStorage.removeItem('accessToken')
       localStorage.removeItem('refreshToken')
-      window.location.href = '/login'
+      
       return Promise.reject(refreshError)
     } finally {
       isRefreshing = false

@@ -13,7 +13,7 @@ interface PostActionProps {
 }
 
 export const PostActions = ({ post, hideComments = false }: PostActionProps) => {
-  const { isLiked, isReposted, comments, isLoadingComments, commentError, toggleLike, toggleRepost, fetchComments, addComment } = usePostActions(post.id);
+  const { isLiked, isReposted, comments, isLoadingComments, commentError, toggleLike, toggleRepost, fetchComments, addComment } = usePostActions(post);
   const [showComments, setShowComments] = useState(false);
   const [commentInput, setCommentInput] = useState('');
 
@@ -41,8 +41,8 @@ export const PostActions = ({ post, hideComments = false }: PostActionProps) => 
             ? <Heart size={16} className="fill-rose-500 text-rose-500" />
             : <Heart size={16} />
           }
-          count={post.likesCount}
-          onClick={() => toggleLike(post.likesCount)}
+          count={post._count.likes}
+          onClick={() => toggleLike(post._count.likes)}
           active={isLiked}
           activeColor="text-rose-500"
           hoverColor="hover:text-rose-500"
@@ -53,7 +53,7 @@ export const PostActions = ({ post, hideComments = false }: PostActionProps) => 
         {!hideComments && (
           <ActionButton
             icon={<MessageCircle size={16} />}
-            count={post.commentsCount ?? 0}
+            count={post._count.comments}
             onClick={handleToggleComments}
             active={showComments}
             activeColor="text-sky-400"
@@ -65,8 +65,8 @@ export const PostActions = ({ post, hideComments = false }: PostActionProps) => 
 
         <ActionButton
           icon={<Repeat2 size={16} />}
-          count={post.repostsCount ?? 0}
-          onClick={() => toggleRepost(post.repostsCount ?? 0)}
+          count={post._count.reposts}
+          onClick={() => toggleRepost(post._count.reposts)}
           active={isReposted}
           activeColor="text-emerald-400"
           hoverColor="hover:text-emerald-400"

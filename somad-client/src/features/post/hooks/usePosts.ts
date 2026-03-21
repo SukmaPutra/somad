@@ -5,16 +5,16 @@ import { getFeedService } from '../services/postService';
 
 export const usePosts = () => {
   const {
-    posts, isLoading, error, hasMore, lastDoc,
+    posts, isLoading, error, hasMore, currentPage,
     setPosts, appendPosts, setLoading, setError,
-    setHasMore, setLastDoc,
+    setHasMore, setCurrentPage,
   } = usePostStore();
 
   // Load pertama kali
   const loadInitial = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const { data, success, error: err } = await getFeedService();
+    const { data, success, error: err } = await getFeedService(1);
 
     if (!success || !data) {
       setError(err);
@@ -23,8 +23,10 @@ export const usePosts = () => {
     }
 
     setPosts(data.posts);
-    setLastDoc(data.lastDoc);
-    setHasMore(data.hasMore);
+    console.log('📌 Sample post:', data.posts[0]);
+    console.log('📦 Data dari API:', data);
+    setCurrentPage(1);
+    setHasMore(data.pagination.hasNext);
     setLoading(false);
   }, []);
 
@@ -33,7 +35,9 @@ export const usePosts = () => {
     if (!hasMore || isLoading) return;
 
     setLoading(true);
-    const { data, success } = await getFeedService(lastDoc as any);
+    const nextPage = currentPage + 1 // ← hitung page berikutnya
+
+    const {data, success} = await getFeedService(nextPage)
 
     if (!success || !data) {
       setLoading(false);
@@ -41,10 +45,10 @@ export const usePosts = () => {
     }
 
     appendPosts(data.posts);
-    setLastDoc(data.lastDoc);
-    setHasMore(data.hasMore);
+    setCurrentPage(nextPage);
+    setHasMore(data.pagination.hasNext);
     setLoading(false);
-  }, [hasMore, isLoading, lastDoc]);
+  }, [hasMore, isLoading, currentPage]);
 
   useEffect(() => {
     // Hanya fetch jika store masih kosong

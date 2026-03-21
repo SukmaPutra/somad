@@ -6,12 +6,12 @@ interface PostDetailImageProps {
 }
 
 export const PostDetailImage = ({ post }: PostDetailImageProps) => {
-  if (!post.imageURL) return null;
+  if (!post.imageUrl) return null;
 
   return (
     <div className="flex items-center justify-center bg-[var(--color-bg)] h-full min-h-100">
       <img
-        src={post.imageURL}
+        src={post.imageUrl}
         alt="post image"
         className="w-full h-full object-contain max-h-[80vh]"
       />

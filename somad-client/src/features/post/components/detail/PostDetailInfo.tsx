@@ -17,14 +17,14 @@ export const PostDetailInfo = ({ post }: PostDetailInfoProps) => {
       {/* Author */}
       <Link to={profilePath} className="flex items-center gap-3 w-fit">
         <Avatar
-          src={post.author.photoURL}
-          alt={post.author.displayName}
+          src={post.author.imageUrl}
+          alt={post.author.name}
           size="md"
           isVerified={post.author.isVerified}
         />
         <div className="flex flex-col">
           <span className="font-semibold text-[var(--color-text-primary)] text-sm hover:underline">
-            {post.author.displayName}
+            {post.author.name}
           </span>
           <span className="text-[var(--color-text-muted)] text-xs">
             @{post.author.username}

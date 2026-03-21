@@ -1,18 +1,22 @@
 // features/posts/types/post.types.ts
 
 import { UserSnippet } from "@/shared/types";
-import { Timestamp } from "firebase/firestore";
+
 
 export interface Post {
-    id: string;
-    author: UserSnippet;
-    content: string;
-    imageURL: string | null;
-    likesCount: number;
-    repostsCount: number;
-    commentsCount: number;
-    createdAt: Timestamp;
-    updatedAt: Timestamp;
+    id: string
+  author: UserSnippet
+  content: string
+  imageUrl: string | null
+  _count: {
+    likes: number
+    comments: number
+    reposts: number
+  }
+  isLiked: boolean     // ← tambah
+  isReposted: boolean  // ← tambah
+  createdAt: string
+  updatedAt: string
 
 }
 
@@ -21,7 +25,7 @@ export interface Comment {
     postId: string;
     author: UserSnippet;
     content: string;
-    createdAt: Timestamp;
+    createdAt: string;
     parentId?: string | null;
 }
 
@@ -30,7 +34,7 @@ export interface Comment {
 
 export interface RepostRecord {
     uid: string;
-    createdAt: Timestamp;
+    createdAt: string;
 }
 
 //state Zustand
@@ -39,7 +43,7 @@ export interface PostState{
     isLoading:boolean;
     error:string|null;
     hasMore:boolean;
-    lastDoc: unknown;
+    currentPage: number
 }
 
 export interface PostActions{
@@ -50,7 +54,7 @@ export interface PostActions{
     setLoading: (isLoading:boolean)=> void;
     setError:(error:string|null)=> void;
     setHasMore: (hasMore:boolean)=>void;
-    setLastDoc: (lastDoc:unknown)=>void;
+    setCurrentPage: (page: number)=>void;
     prependPost: (post: Post) => void;
     reset: ()=>void;
 

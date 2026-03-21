@@ -17,14 +17,17 @@ export interface PaginationMeta {
   page: number;
   limit: number;
   hasMore: boolean;
-  lastDoc?: unknown; // Firestore DocumentSnapshot untuk cursor
+  currentPage?: number;
+  lastDoc?: unknown;
 }
 
 // User ringkas — dipakai di postingan, komentar, dll
 export interface UserSnippet {
   uid: string;
   username: string;
-  displayName: string;
-  photoURL: string | null;
+  name: string;
+  displayName?: string;
+  imageUrl: string | null;
+  photoURL?: string | null;
   isVerified?: boolean;
 }

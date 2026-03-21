@@ -41,7 +41,7 @@ export const PostDetailPage = () => {
     );
   }
 
-  const hasImage = !!post.imageURL;
+  const hasImage = !!post.imageUrl;
 
   return (
     <div className="min-h-screen bg-(--color-bg)">

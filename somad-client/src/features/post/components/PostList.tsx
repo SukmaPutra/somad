@@ -21,7 +21,7 @@ export const PostList = () => {
 
   if (error) {
     return (
-      <div className="text-center py-12 text-(--color-text-muted)]">
+      <div className="text-center py-12 text-(--color-text-muted)">
         <p>Gagal memuat postingan.</p>
         <p className="text-sm mt-1">{error}</p>
       </div>
@@ -43,13 +43,13 @@ export const PostList = () => {
       )}
 
       {!hasMore && posts.length > 0 && (
-        <p className="text-center text-(--color-text-muted)] text-sm py-6">
+        <p className="text-center text-(--color-text-muted) text-sm py-6">
           Kamu sudah melihat semua postingan.
         </p>
       )}
 
       {!isLoading && posts.length === 0 && (
-        <div className="text-center py-12 text-(--color-text-muted)]">
+        <div className="text-center py-12 text-(--color-text-muted)">
           <p className="text-lg">Belum ada postingan.</p>
           <p className="text-sm mt-1">Jadilah yang pertama posting!</p>
         </div>

@@ -6,11 +6,17 @@ export interface UserProfile {
   email: string;
   username: string;
   name: string;
+  displayName: string;
   avatarUrl: string | null;
+  photoURL: string | null;
   coverUrl: string | null;
   bio: string;
   isVerified: boolean;
   createdAt: string;
+  updatedAt?: string;
+  postsCount: number;
+  followersCount: number;
+  followingCount: number;
 
   //counter dari prisma relation
   _count?: {

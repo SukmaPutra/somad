@@ -9,7 +9,7 @@ interface PostDetailCommentsProps {
 }
 
 export const PostDetailComments = ({ post }: PostDetailCommentsProps) => {
-  const { comments, isLoadingComments, commentError, fetchComments, addComment } = usePostActions(post.id);
+  const { comments, isLoadingComments, commentError, fetchComments, addComment } = usePostActions(post);
   const [commentInput, setCommentInput] = useState("");
 
   useEffect(() => {

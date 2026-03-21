@@ -10,7 +10,7 @@ const initialState: PostState = {
   isLoading: false,
   error: null,
   hasMore: true,
-  lastDoc: undefined,
+  currentPage: 1,
 };
 
 export const usePostStore = create<PostStore>()(
@@ -45,7 +45,7 @@ export const usePostStore = create<PostStore>()(
       setLoading: (isLoading) => set({ isLoading }, false, "posts/setLoading"),
       setError: (error) => set({ error }, false, "posts/setError"),
       setHasMore: (hasMore) => set({ hasMore }, false, "posts/setHasMore"),
-      setLastDoc: (lastDoc) => set({ lastDoc }, false, "posts/setLastDoc"),
+      setCurrentPage: (page: number) => set({ currentPage: page }, false, "posts/setCurrentPage"),
       reset: () => set(initialState, false, "posts/reset"),
     }),
     { name: "PostStore" },

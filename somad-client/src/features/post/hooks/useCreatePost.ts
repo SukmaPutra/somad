@@ -8,6 +8,8 @@ import { createPostService } from '../services/postService';
 import { createPostSchema, type CreatePostData } from '../schemas/postSchema';
 import { useToast } from '@/shared/hooks/useToast';
 import { POST_MESSAGES } from '../constants/postConstants';
+import { uploadImageToCloudinary } from '@/core/utils/cloudinaryService';
+
 
 
 export const useCreatePost = (onSuccess?: () => void) => {
@@ -23,30 +25,32 @@ export const useCreatePost = (onSuccess?: () => void) => {
   const submit = useCallback(async (data: CreatePostData) => {
     if (!user) return;
 
-    const author = {
-      uid:         user.uid,
-      username:    user.username,
-      displayName: user.displayName,
-      photoURL:    user.photoURL,
-      isVerified:  user.isVerified,
-    };
+     let imageUrl: string | null = null;
 
-    const { data: newPost, success, error } = await createPostService(
-      data.content,
-      author,
-      data.image ?? null
-    );
+    if (data.image) {
+    imageUrl = await uploadImageToCloudinary(data.image);
+    if (!imageUrl) {
+      showToast('error', 'Gagal mengupload gambar');
+      return;
+    }
+  }
 
-    if (!success || !newPost) {
-      showToast('error', error ?? POST_MESSAGES.CREATE_ERROR)
-      return};
+  const { data: newPost, success, error } = await createPostService(
+    data.content,
+    imageUrl  // ← string URL, bukan File
+  );
 
-    prependPost(newPost); // ← ganti dari setPosts([newPost, ...posts])
-    form.reset();
-    showToast('success', POST_MESSAGES.CREATE_SUCCESS)
-    onSuccess?.();
+  if (!success || !newPost) {
+    showToast('error', error ?? POST_MESSAGES.CREATE_ERROR);
+    return;
+  }
 
-  }, [user, prependPost]); // ← posts sudah tidak ada di sini
+  prependPost(newPost);
+  form.reset();
+  showToast('success', POST_MESSAGES.CREATE_SUCCESS);
+  onSuccess?.();
+
+  }, [user, prependPost, showToast, form]); 
 
   return {
     form,

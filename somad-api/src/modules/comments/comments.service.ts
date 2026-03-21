@@ -1,5 +1,33 @@
 import { prisma } from '../../config/database'
 
+const authorSelect = { id: true, username: true, name: true, avatarUrl: true, isVerified: true }
+
+const formatComment = (comment: {
+  id: string
+  postId: string
+  content: string
+  createdAt: Date
+  author: {
+    id: string
+    username: string
+    name: string
+    avatarUrl: string | null
+    isVerified: boolean | null
+  }
+}) => ({
+  id: comment.id,
+  postId: comment.postId,
+  content: comment.content,
+  createdAt: comment.createdAt,
+  author: {
+    uid: comment.author.id,
+    username: comment.author.username,
+    name: comment.author.name,
+    imageUrl: comment.author.avatarUrl ?? null,
+    isVerified: comment.author.isVerified ?? false,
+  },
+})
+
 export const createComment = async (data: {
   content: string
   postId: string
@@ -9,15 +37,16 @@ export const createComment = async (data: {
     data,
     select: {
       id: true,
+      postId: true,
       content: true,
       createdAt: true,
       author: {
-        select: { id: true, username: true, name: true, avatarUrl: true }
+        select: authorSelect
       }
     }
   })
 
-  return comment
+  return formatComment(comment)
 }
 
 export const getComments = async (data: {
@@ -36,10 +65,11 @@ export const getComments = async (data: {
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
+        postId: true,
         content: true,
         createdAt: true,
         author: {
-          select: { id: true, username: true, name: true, avatarUrl: true }
+          select: authorSelect
         }
       }
     }),
@@ -47,7 +77,7 @@ export const getComments = async (data: {
   ])
 
   return {
-    comments,
+    comments: comments.map((comment) => formatComment(comment)),
     pagination: {
       total,
       page,
@@ -56,4 +86,35 @@ export const getComments = async (data: {
       hasNextPage: page < Math.ceil(total / limit),
     }
   }
+}
+
+export const getCommentById = async (commentId: string) => {
+  return prisma.comment.findUnique({
+    where: { id: commentId },
+    select: { id: true, postId: true, authorId: true },
+  })
+}
+
+export const updateComment = async (commentId: string, content: string) => {
+  const comment = await prisma.comment.update({
+    where: { id: commentId },
+    data: { content },
+    select: {
+      id: true,
+      postId: true,
+      content: true,
+      createdAt: true,
+      author: {
+        select: authorSelect,
+      },
+    },
+  })
+
+  return formatComment(comment)
+}
+
+export const deleteComment = async (commentId: string) => {
+  await prisma.comment.delete({
+    where: { id: commentId },
+  })
 }

@@ -1,14 +1,15 @@
 import { Response, NextFunction } from 'express'
 import { verifyAccessToken } from '../config/jwt'
 import { AuthRequest } from '../shared/type/index'
+import { ApiError } from '../shared/errors/api-error'
 
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers.authorization
 
     if (!authHeader?.startsWith('Bearer ')) {
-      res.status(401).json({ message: 'Token tidak ditemukan' })
-      return
+      next(new ApiError(401, 'UNAUTHORIZED', 'Token tidak ditemukan'))
+      return;
     }
 
     const token = authHeader.split(' ')[1]
@@ -18,6 +19,6 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
     next()              // lanjut ke controller
 
   } catch {
-    res.status(401).json({ message: 'Token tidak valid atau sudah expired' })
+    next(new ApiError(401, 'UNAUTHORIZED', 'Token tidak valid atau sudah expired'))
   }
 }

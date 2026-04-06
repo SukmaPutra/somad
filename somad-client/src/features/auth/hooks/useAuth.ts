@@ -22,8 +22,10 @@ export const useAuth = () => {
         setUser(user);
         navigate(AUTH_ROUTES.FEED);
         return true;
-      } catch (err: any) {
-        const message = err.response?.data?.message || "Login gagal";
+      } catch (err: unknown) {
+        const message =
+          (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+          'Login gagal';
         setError(message);
         return false;
       } finally {
@@ -44,8 +46,10 @@ export const useAuth = () => {
         setUser(user);
         navigate(AUTH_ROUTES.FEED);
         return true;
-      } catch (err: any) {
-        const message = err.response?.data?.message || "Registrasi gagal";
+      } catch (err: unknown) {
+        const message =
+          (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+          'Registrasi gagal';
         setError(message);
         return false;
       } finally {

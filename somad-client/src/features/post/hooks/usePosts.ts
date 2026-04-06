@@ -28,7 +28,7 @@ export const usePosts = () => {
     setCurrentPage(1);
     setHasMore(data.pagination.hasNext);
     setLoading(false);
-  }, []);
+  }, [setLoading, setError, setPosts, setCurrentPage, setHasMore]);
 
   // Load more — dipanggil saat user scroll ke bawah
   const loadMore = useCallback(async () => {
@@ -48,14 +48,22 @@ export const usePosts = () => {
     setCurrentPage(nextPage);
     setHasMore(data.pagination.hasNext);
     setLoading(false);
-  }, [hasMore, isLoading, currentPage]);
+  }, [
+    hasMore,
+    isLoading,
+    currentPage,
+    setLoading,
+    appendPosts,
+    setCurrentPage,
+    setHasMore,
+  ]);
 
   useEffect(() => {
     // Hanya fetch jika store masih kosong
-  if (posts.length === 0) {
-    loadInitial();
-  }
-  }, [loadInitial]);
+    if (posts.length === 0) {
+      loadInitial();
+    }
+  }, [posts.length, loadInitial]);
 
   return { posts, isLoading, error, hasMore, loadMore, refresh: loadInitial };
 };

@@ -2,9 +2,9 @@
 import { useCallback } from "react";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import { useProfileStore } from "../store/profileStore";
-import { followUserService, unfollowUserService } from "../services/profileService";
+import { toggleFollowService } from "../services/profileService";
 
-export const useFollow = (targetUid: string) => {
+export const useFollow = (targetUsername: string) => {
   const { user, setUser } = useAuthStore();
   const { isFollowing, setIsFollowing, profile, setProfile } = useProfileStore();
 
@@ -13,33 +13,57 @@ export const useFollow = (targetUid: string) => {
 
     const newFollowing = !isFollowing;
 
-    // ✅ Simpan snapshot sebelum update
-    const prevFollowersCount = profile.followersCount;
-    const prevFollowingCount = user.followingCount;
+    const prevFollowersCount = profile._count?.followers ?? 0;
+    const prevFollowingCount = user._count?.following ?? 0;
 
-    // Optimistic update — profile target (followersCount)
+    // fix error 1 — eksplisit semua field, tidak pakai spread _count
     setIsFollowing(newFollowing);
     setProfile({
       ...profile,
-      followersCount: profile.followersCount + (newFollowing ? 1 : -1),
+      _count: {
+        posts:     profile._count?.posts     ?? 0,
+        followers: prevFollowersCount + (newFollowing ? 1 : -1),
+        following: profile._count?.following ?? 0,
+      },
     });
-
-    // Optimistic update — user sendiri (followingCount) ← ini yang kurang
     setUser({
       ...user,
-      followingCount: user.followingCount + (newFollowing ? 1 : -1),
+      _count: {
+        posts:     user._count?.posts     ?? 0,
+        followers: user._count?.followers ?? 0,
+        following: prevFollowingCount + (newFollowing ? 1 : -1),
+      },
     });
 
-    const { success } = newFollowing ? await followUserService(user.uid, targetUid) : await unfollowUserService(user.uid, targetUid);
+    const { data, success } = await toggleFollowService(targetUsername);
 
+    if (!success) {
+      setIsFollowing(!newFollowing);
+      setProfile({
+        ...profile,
+        _count: {
+          posts:     profile._count?.posts     ?? 0,
+          followers: prevFollowersCount,
+          following: profile._count?.following ?? 0,
+        },
+      });
+      setUser({
+        ...user,
+        _count: {
+          posts:     user._count?.posts     ?? 0,
+          followers: user._count?.followers ?? 0,
+          following: prevFollowingCount,
+        },
+      });
+      return;
+    }
 
-    // ✅ Revert pakai snapshot yang benar
-  if (!success) {
-    setIsFollowing(!newFollowing);
-    setProfile({ ...profile, followersCount: prevFollowersCount });
-    setUser({ ...user, followingCount: prevFollowingCount });
-  }
-}, [user, targetUid, isFollowing, profile]);
+    // fix error 2 — pastikan data ada dan punya field following
+    if (data && typeof data.following === 'boolean') {
+      setIsFollowing(data.following);
+    }
+
+  }, [user, targetUsername, isFollowing, profile, setIsFollowing, setProfile, setUser]);
 
   return { isFollowing, toggleFollow };
 };

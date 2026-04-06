@@ -1,10 +1,7 @@
 // core/context/ThemeContext.tsx
-import { createContext, useContext, ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { useTheme } from '@/shared/hooks/useTheme';
-
-type ThemeContextType = ReturnType<typeof useTheme>;
-
-const ThemeContext = createContext<ThemeContextType | null>(null);
+import { ThemeContext } from './ThemeContextStore';
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const themeValue = useTheme();
@@ -13,10 +10,4 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </ThemeContext.Provider>
   );
-};
-
-export const useThemeContext = () => {
-  const ctx = useContext(ThemeContext);
-  if (!ctx) throw new Error('useThemeContext must be used inside ThemeProvider');
-  return ctx;
 };

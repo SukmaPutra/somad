@@ -50,7 +50,7 @@ export const useCreatePost = (onSuccess?: () => void) => {
   showToast('success', POST_MESSAGES.CREATE_SUCCESS);
   onSuccess?.();
 
-  }, [user, prependPost, showToast, form]); 
+  }, [user, prependPost, showToast, form, onSuccess]); 
 
   return {
     form,

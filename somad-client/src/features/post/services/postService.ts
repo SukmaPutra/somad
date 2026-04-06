@@ -58,8 +58,11 @@ export const createPostService = async (content: string, imageUrl: string | null
     });
 
     return ok(data.post);
-  } catch (err: any) {
-    return fail(err.response?.data?.message ?? "Gagal membuat postingan");
+  } catch (err: unknown) {
+    const message =
+      (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+      'Gagal membuat postingan';
+    return fail(message);
   }
 };
 
@@ -69,8 +72,11 @@ export const getPostByIdService = async (postId: string) => {
     const { data } = await apiClient.get<PostEnvelope>(`/posts/${postId}`);
 
     return ok(data.post);
-  } catch (err: any) {
-    return fail(err.response?.data?.message ?? "Postingan tidak ditemukan");
+  } catch (err: unknown) {
+    const message =
+      (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+      'Postingan tidak ditemukan';
+    return fail(message);
   }
 };
 
@@ -82,8 +88,11 @@ export const getFeedService = async (page = 1, limit = 10) => {
     });
 
     return ok(data);
-  } catch (err: any) {
-    return fail(err.response?.data?.message ?? "Gagal memuat feed");
+  } catch (err: unknown) {
+    const message =
+      (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+      'Gagal memuat feed';
+    return fail(message);
   }
 };
 
@@ -93,8 +102,11 @@ export const toggleLikeService = async (postId: string) => {
     const { data } = await apiClient.post<ToggleLikeResponse>(`/posts/${postId}/like`);
 
     return ok(data);
-  } catch (err: any) {
-    return fail(err.response?.data?.message ?? "Gagal mengubah like");
+  } catch (err: unknown) {
+    const message =
+      (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+      'Gagal mengubah like';
+    return fail(message);
   }
 };
 
@@ -104,8 +116,11 @@ export const addCommentService = async (postId: string, content: string) => {
     const { data } = await apiClient.post<CommentEnvelope>(`/posts/${postId}/comments`, { content });
 
     return ok(data.comment);
-  } catch (err: any) {
-    return fail(err.response?.data?.message ?? "Gagal menambah komentar");
+  } catch (err: unknown) {
+    const message =
+      (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+      'Gagal menambah komentar';
+    return fail(message);
   }
 };
 
@@ -115,8 +130,11 @@ export const getCommentsService = async (postId: string) => {
     const { data } = await apiClient.get<CommentsResponse>(`/posts/${postId}/comments`);
 
     return ok(data.comments);
-  } catch (err: any) {
-    return fail(err.response?.data?.message ?? "Gagal memuat komentar");
+  } catch (err: unknown) {
+    const message =
+      (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+      'Gagal memuat komentar';
+    return fail(message);
   }
 };
 
@@ -124,7 +142,10 @@ export const toggleRepostService = async (postId: string) => {
   try {
     const { data } = await apiClient.post<ToggleRepostResponse>(`/posts/${postId}/repost`);
     return ok(data);
-  } catch (err: any) {
-    return fail(err.response?.data?.message ?? "Gagal mengubah repost");
+  } catch (err: unknown) {
+    const message =
+      (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+      'Gagal mengubah repost';
+    return fail(message);
   }
 };

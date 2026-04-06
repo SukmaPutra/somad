@@ -1,5 +1,6 @@
 import { prisma } from "../../config/database";
-import {UpdateProfileInput} from './users.schema'
+import { UpdateProfileInput } from "./users.schema";
+import { formatPost } from "../posts/posts.service";
 
 const userSelect = {
   id: true,
@@ -50,6 +51,14 @@ export const updateProfile = async (params: {
       bio: true,
       avatarUrl: true,
       coverUrl: true,
+      createdAt: true,
+      _count: {
+        select: {
+          posts: true,
+          followers: true,
+          following: true,
+        },
+      },
     },
   });
   return user
@@ -84,47 +93,65 @@ export const toggleFollow = async (data: {
   }
 }
 
-// ── POST MILIK USER ────────────────────────────────────────────
-// Filter post berdasarkan userId, bukan ambil semua post
-export const getUserPosts = async (data: {
-  userId: string
-  page: number
-  limit: number
-}) => {
-  const { userId, page, limit } = data
-  const skip = (page - 1) * limit
+const authorSelectProfile = {
+  id: true,
+  username: true,
+  name: true,
+  avatarUrl: true,
+  isVerified: true,
+} as const;
 
-  const [posts, total] = await Promise.all([
+// ── POST MILIK USER ────────────────────────────────────────────
+// Sama bentuknya dengan feed (formatPost): imageUrl author, _count reposts, isLiked / isReposted untuk viewer.
+export const getUserPosts = async (data: {
+  authorId: string;
+  viewerId: string;
+  page: number;
+  limit: number;
+}) => {
+  const { authorId, viewerId, page, limit } = data;
+  const skip = (page - 1) * limit;
+
+  const where = { authorId };
+
+  const [rows, total] = await Promise.all([
     prisma.post.findMany({
-      where: { authorId: userId },   // ← filter by userId
+      where,
       skip,
       take: limit,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       select: {
         id: true,
         content: true,
         imageUrl: true,
         createdAt: true,
-        author: {
-          select: { id: true, username: true, name: true, avatarUrl: true }
+        updatedAt: true,
+        author: { select: authorSelectProfile },
+        _count: { select: { likes: true, comments: true, reposts: true } },
+        likes: {
+          where: { userId: viewerId },
+          select: { userId: true },
         },
-        _count: { select: { likes: true, comments: true } }
-      }
+        reposts: {
+          where: { authorId: viewerId },
+          select: { id: true },
+        },
+      },
     }),
-    prisma.post.count({ where: { authorId: userId } })
-  ])
+    prisma.post.count({ where }),
+  ]);
 
   return {
-    posts,
+    posts: rows.map((p) => formatPost(p)),
     pagination: {
       total,
       page,
       limit,
       totalPages: Math.ceil(total / limit),
       hasNextPage: page < Math.ceil(total / limit),
-    }
-  }
-}
+    },
+  };
+};
 
 // ── FOLLOWERS ──────────────────────────────────────────────────
 // Cari semua Follow record dimana followingId = userId

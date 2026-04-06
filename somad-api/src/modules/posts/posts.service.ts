@@ -22,7 +22,8 @@ type RawPost = {
   };
 };
 
-const formatPost = (post: RawPost) => ({
+/** Dipakai juga oleh users.service (post milik profil) agar bentuk respons sama dengan feed. */
+export const formatPost = (post: RawPost) => ({
   id: post.id,
   content: post.content,
   imageUrl: post.imageUrl ?? null,

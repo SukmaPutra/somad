@@ -5,11 +5,10 @@ import { useProfileStore } from '../store/profileStore';
 import {
   getProfileByUsernameService,
   getUserPostsService,
-  checkIsFollowingService,
 } from '../services/profileService';
 
 export const useProfile = (username: string) => {
-  const { user: currentUser }  = useAuthStore();
+  const { user: currentUser } = useAuthStore();
   const {
     profile, posts, isLoading, isLoadingPosts, error, isFollowing,
     setProfile, setPosts, setLoading, setLoadingPosts,
@@ -22,7 +21,9 @@ export const useProfile = (username: string) => {
     setLoading(true);
     setError(null);
 
-    const { data, success, error: err } = await getProfileByUsernameService(username);
+    const { data, isFollowing: following, success, error: err }
+      = await getProfileByUsernameService(username);
+
     if (!success || !data) {
       setError(err);
       setLoading(false);
@@ -30,26 +31,24 @@ export const useProfile = (username: string) => {
     }
 
     setProfile(data);
+    if (!isOwnProfile) setIsFollowing(following);
     setLoading(false);
 
-    // Load posts & follow status secara paralel
     setLoadingPosts(true);
-    const [postsResult, followResult] = await Promise.all([
-      getUserPostsService(data.uid),
-      !isOwnProfile && currentUser
-        ? checkIsFollowingService(currentUser.uid, data.uid)
-        : Promise.resolve({ data: false, success: true, error: null }),
-    ]);
-
-    if (postsResult.data) setPosts(postsResult.data);
-    if (followResult.data !== null) setIsFollowing(followResult.data as boolean);
+    const postsResult = await getUserPostsService(data.username, 1, 10);
+    if (postsResult.data?.posts) setPosts(postsResult.data.posts);  // ← guard
     setLoadingPosts(false);
-  }, [username, currentUser]);
 
+  }, [username, isOwnProfile]);
+
+  // pisah dua useEffect
   useEffect(() => {
     loadProfile();
-    return () => reset();
-  }, [username]);
+  }, [loadProfile]);
+
+  useEffect(() => {
+    return () => reset();  // ← reset hanya saat unmount
+  }, [reset]);
 
   return {
     profile, posts, isLoading, isLoadingPosts,

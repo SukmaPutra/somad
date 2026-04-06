@@ -7,9 +7,9 @@ const NotificationPage = () => {
   useDocumentTitle(PAGE_TITLES.NOTIFICATIONS)
 
   return (
-    <div className="min-h-screen bg-(--color-bg) flex items-center justify-center px-6">
-      <div className="text-center">
-        <Bell size={48} className="text-[#137fec mx-auto" />
+    <div className="min-h-[50vh] flex items-center justify-center py-12 px-4">
+      <div className="text-center max-w-sm">
+        <Bell size={48} className="text-[#137fec] mx-auto" />
         <h1 className="mt-4 text-3xl font-bold text-(--color-text-primary)">
           Fitur Notifikasi
         </h1>

@@ -47,7 +47,7 @@ export const Logo = () => (
     ">
       <Zap size={16} className="text-white fill-white" />
     </div>
-    <span className="font-bold text-lg tracking-tight text-(--color-text-primary)]">
+    <span className="font-bold text-lg tracking-tight text-(--color-text-primary)">
       Somad
     </span>
   </Link>
@@ -65,18 +65,18 @@ const MockPostCard = ({ post }: { post: (typeof MOCK_POSTS)[0] }) => (
       />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-semibold text-(--color-text-primary)] text-sm">
+          <span className="font-semibold text-(--color-text-primary) text-sm">
             {post.author.displayName}
           </span>
-          <span className="text-(--color-text-muted)] text-sm">
+          <span className="text-(--color-text-muted) text-sm">
             @{post.author.username}
           </span>
-          <span className="text-(--color-text-muted)] text-xs">·</span>
-          <span className="text-(--color-text-muted)] text-xs">
-            {formatRelativeTime(post.createdAt as any)}
+          <span className="text-(--color-text-muted) text-xs">·</span>
+          <span className="text-(--color-text-muted) text-xs">
+            {formatRelativeTime(post.createdAt)}
           </span>
         </div>
-        <p className="text-(--color-text-secondary)] text-sm mt-1 whitespace-pre-wrap break-words">
+        <p className="text-(--color-text-secondary) text-sm mt-1 whitespace-pre-wrap break-words">
           {post.content}
         </p>
       </div>
@@ -86,7 +86,7 @@ const MockPostCard = ({ post }: { post: (typeof MOCK_POSTS)[0] }) => (
       <img
         src={post.imageURL}
         alt="post"
-        className="w-full rounded-lg object-cover max-h-64 border border-(--color-border)]"
+        className="w-full rounded-lg object-cover max-h-64 border border-(--color-border)"
       />
     )}
 
@@ -96,7 +96,7 @@ const MockPostCard = ({ post }: { post: (typeof MOCK_POSTS)[0] }) => (
         { icon: <Repeat2 size={16} />, count: post.repostsCount },
         { icon: <MessageCircle size={16} />, count: post.commentsCount },
       ].map(({ icon, count }, i) => (
-        <span key={i} className="flex items-center gap-1.5 text-sm text-(--color-text-muted)]">
+        <span key={i} className="flex items-center gap-1.5 text-sm text-(--color-text-muted)">
           {icon}<span>{count}</span>
         </span>
       ))}
@@ -116,7 +116,7 @@ export const Home = () => {
         className="sticky top-0 z-20 border-b border-(--color-border) backdrop-blur-md"
         style={{ background: 'color-mix(in srgb, var(--color-bg) 80%, transparent)' }}
       >
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-3 sm:gap-4">
 
           <Logo />
 
@@ -161,7 +161,7 @@ export const Home = () => {
       </nav>
 
       {/* ── Hero Section ── */}
-      <section className="max-w-5xl mx-auto px-6 pt-24 pb-20 flex flex-col lg:flex-row items-center gap-16">
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 pt-16 sm:pt-24 pb-16 sm:pb-20 flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
 
         {/* Teks kiri */}
         <div className="flex-1 flex flex-col gap-6 text-center lg:text-left">
@@ -182,7 +182,7 @@ export const Home = () => {
             <span className="text-gradient-brand">dunia</span>.
           </h1>
 
-          <p className="text-(--color-text-secondary)] text-lg leading-relaxed max-w-md mx-auto lg:mx-0">
+          <p className="text-(--color-text-secondary) text-lg leading-relaxed max-w-md mx-auto lg:mx-0">
             Bagikan momen, ide, dan ceritamu. Temukan orang-orang yang peduli dengan hal yang sama denganmu.
           </p>
 
@@ -203,10 +203,10 @@ export const Home = () => {
               to={ROUTES.LOGIN}
               className="
                 px-8 py-3 text-sm font-medium rounded-full text-center
-                border border-(--color-border)]
-                text-(--color-text-secondary)]
-                hover:bg-(--color-surface)]
-                hover:text-(--color-text-primary)]
+                border border-(--color-border)
+                text-(--color-text-secondary)
+                hover:bg-(--color-surface)
+                hover:text-(--color-text-primary)
                 transition-all duration-200
               "
             >
@@ -214,9 +214,9 @@ export const Home = () => {
             </Link>
           </div>
 
-          <p className="text-(--color-text-muted)] text-sm">
+          <p className="text-(--color-text-muted) text-sm">
             Bergabung bersama{' '}
-            <span className="text-(--color-text-primary)] font-medium">saya</span>{' '}
+            <span className="text-(--color-text-primary) font-medium">saya</span>{' '}
             untuk melihat project ini berkembang!
           </p>
         </div>
@@ -226,11 +226,11 @@ export const Home = () => {
           {/* Fade atas & bawah */}
           <div className="
             absolute top-0 left-0 right-0 h-8 z-10 rounded-t-xl
-            bg-gradient-to-b from-(--color-bg)] to-transparent
+            bg-gradient-to-b from-(--color-bg) to-transparent
           " />
           <div className="
             absolute bottom-0 left-0 right-0 h-40 z-10 rounded-b-xl
-            bg-gradient-to-t from-(--color-bg)] via-[color-mix(in_srgb,var(--color-bg)_80%,transparent)] to-transparent
+            bg-gradient-to-t from-(--color-bg) via-[color-mix(in_srgb,var(--color-bg)_80%,transparent)] to-transparent
           " />
 
           {/* CTA overlay */}
@@ -238,14 +238,14 @@ export const Home = () => {
             <div className="flex flex-col items-center gap-3">
               <div className="
                 surface-card rounded-2xl px-5 py-3
-                flex items-center gap-3 shadow-(--shadow-lg)]
+                flex items-center gap-3 shadow-[var(--shadow-lg)]
               ">
-                <Lock size={24} className="text-(--color-text-primary)]" />
+                <Lock size={24} className="text-(--color-text-primary)" />
                 <div>
-                  <p className="text-(--color-text-primary)] text-sm font-medium">
+                  <p className="text-(--color-text-primary) text-sm font-medium">
                     Daftar untuk melihat lebih
                   </p>
-                  <p className="text-(--color-text-muted)] text-xs">Gratis selamanya</p>
+                  <p className="text-(--color-text-muted) text-xs">Gratis selamanya</p>
                 </div>
               </div>
               <Link
@@ -272,14 +272,14 @@ export const Home = () => {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-(--color-border)] py-8">
-        <div className="max-w-5xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="text-(--color-text-muted)] text-sm">
+      <footer className="border-t border-(--color-border) py-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <span className="text-(--color-text-muted) text-sm">
             © 2025 Somad. All rights reserved.
           </span>
-          <div className="flex items-center gap-6 text-sm text-(--color-text-muted)]">
+          <div className="flex items-center gap-6 text-sm text-(--color-text-muted)">
             {['Tentang', 'Privasi', 'Ketentuan'].map((item) => (
-              <Link key={item} to="#" className="hover:text-(--color-text-primary)] transition-colors">
+              <Link key={item} to="#" className="hover:text-(--color-text-primary) transition-colors">
                 {item}
               </Link>
             ))}

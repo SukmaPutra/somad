@@ -1,6 +1,7 @@
 // features/posts/hooks/usePostActions.ts
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { useProfileStore } from "@/features/profile/store/profileStore";
 import { usePostStore } from "../store/postStore";
 import { toggleLikeService, addCommentService, getCommentsService, toggleRepostService } from "../services/postService";
 import type { Comment, Post } from "../types/post.types";
@@ -9,9 +10,23 @@ export const usePostActions = (post: Post) => {
   const postId = post.id
   const { user } = useAuthStore();
   const { updatePost } = usePostStore();
+  const updateProfilePost = useProfileStore((s) => s.updatePost);
+
+  const patchPost = useCallback(
+    (id: string, data: Partial<Post>) => {
+      updatePost(id, data);
+      updateProfilePost(id, data);
+    },
+    [updatePost, updateProfilePost]
+  );
 
   const [isLiked, setIsLiked] = useState(post.isLiked);
   const [isReposted, setIsReposted] = useState(post.isReposted);
+
+  useEffect(() => {
+    setIsLiked(post.isLiked);
+    setIsReposted(post.isReposted);
+  }, [post.id, post.isLiked, post.isReposted]);
   const [isTogglingLike, setIsTogglingLike] = useState(false);
   const [isTogglingRepost, setIsTogglingRepost] = useState(false); // ← tambah ini
   const [comments, setComments] = useState<Comment[]>([]);
@@ -27,29 +42,44 @@ export const usePostActions = (post: Post) => {
       const newLiked = !isLiked;
       setIsLiked(newLiked);
 
-      updatePost(postId, 
-        { _count: 
-          { likes: currentCount + (newLiked ? 1 : -1), 
-            comments: post._count.comments,
-            reposts: post._count.reposts
-          } 
-        }); 
+      patchPost(postId, {
+        isLiked: newLiked,
+        _count: {
+          likes: currentCount + (newLiked ? 1 : -1),
+          comments: post._count.comments,
+          reposts: post._count.reposts,
+        },
+      });
 
       try {
         const result = await toggleLikeService(postId); 
         if (!result.success) {
           setIsLiked(!newLiked);
-          updatePost(postId, { _count: { likes: currentCount, comments: post._count.comments, reposts: post._count.reposts } });
+          patchPost(postId, {
+            isLiked: !newLiked,
+            _count: {
+              likes: currentCount,
+              comments: post._count.comments,
+              reposts: post._count.reposts,
+            },
+          });
         }
       } catch (err) {
         console.error("Gagal toggle like:", err);
         setIsLiked(!newLiked);
-        updatePost(postId, { _count: { likes: currentCount, comments: post._count.comments, reposts: post._count.reposts } });
+        patchPost(postId, {
+          isLiked: !newLiked,
+          _count: {
+            likes: currentCount,
+            comments: post._count.comments,
+            reposts: post._count.reposts,
+          },
+        });
       } finally {
         setIsTogglingLike(false);
       }
     },
-    [user, postId, isLiked, isTogglingLike, updatePost],
+    [user, postId, isLiked, isTogglingLike, patchPost, post._count],
   );
 
  // ─── Fetch Comments ───────────────────────────────────────────────────────
@@ -81,23 +111,23 @@ export const usePostActions = (post: Post) => {
             postId,
             content,
             author: {
-              uid: user.uid,
+              uid: user.id,
               username: user.username,
               name: user.name,
               imageUrl: user.avatarUrl,
-              isVerified: user.isVerified,
+              isVerified: false,
             },
             createdAt: data.createdAt,
           };
           setComments((prev) => [newComment, ...prev]);
-          updatePost(postId, { _count: { likes: post._count.likes, comments: post._count.comments + 1, reposts: post._count.reposts } });
+          patchPost(postId, { _count: { likes: post._count.likes, comments: post._count.comments + 1, reposts: post._count.reposts } });
         }
       } catch (err) {
         console.error("Gagal menambah komentar:", err);
         setCommentError("Gagal mengirim komentar, coba lagi.");
       }
     },
-    [user, postId, updatePost],
+    [user, postId, patchPost, post._count],
   );
 
   // ─── Add Repost ──────────────────────────────────────────────────────────
@@ -108,7 +138,7 @@ const toggleRepost = useCallback(
     setIsTogglingRepost(true);
     const newReposted = !isReposted;
     setIsReposted(newReposted);
-    updatePost(postId, {
+    patchPost(postId, {
       isReposted: newReposted,
       _count: {
         likes: post._count.likes,
@@ -121,7 +151,7 @@ const toggleRepost = useCallback(
       const result = await toggleRepostService(postId);
       if (!result.success) {
         setIsReposted(!newReposted);
-        updatePost(postId, {
+        patchPost(postId, {
           isReposted: !newReposted,
           _count: {
             likes: post._count.likes,
@@ -133,7 +163,7 @@ const toggleRepost = useCallback(
     } catch (err) {
       console.error("Gagal toggle repost:", err);
       setIsReposted(!newReposted);
-      updatePost(postId, {
+      patchPost(postId, {
         isReposted: !newReposted,
         _count: {
           likes: post._count.likes,
@@ -145,7 +175,7 @@ const toggleRepost = useCallback(
       setIsTogglingRepost(false);
     }
   },
-  [user, postId, isReposted, isTogglingRepost, updatePost, post],
+  [user, postId, isReposted, isTogglingRepost, patchPost, post],
 );
 
   return {

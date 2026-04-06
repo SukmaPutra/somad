@@ -1,6 +1,7 @@
 // features/profile/store/profileStore.ts
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import type { Post } from '@/features/post/types/post.types';
 import type { ProfileState, ProfileActions } from '../types/profile.types';
 
 
@@ -21,6 +22,16 @@ export const useProfileStore = create<ProfileStore>()(
 
         setProfile:      (profile)     => set({ profile },     false, 'profile/setProfile'),
       setPosts:        (posts)       => set({ posts },       false, 'profile/setPosts'),
+      updatePost:      (id, data)    =>
+        set(
+          (state) => ({
+            posts: state.posts.map((p: Post) =>
+              p.id === id ? { ...p, ...data } : p
+            ),
+          }),
+          false,
+          'profile/updatePost'
+        ),
       setLoading:      (isLoading)   => set({ isLoading },   false, 'profile/setLoading'),
       setLoadingPosts: (isLoadingPosts) => set({ isLoadingPosts }, false, 'profile/setLoadingPosts'),
       setError:        (error)       => set({ error },       false, 'profile/setError'),

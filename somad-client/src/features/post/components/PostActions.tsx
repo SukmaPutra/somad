@@ -77,20 +77,20 @@ export const PostActions = ({ post, hideComments = false }: PostActionProps) => 
 
       {/* Comments Section */}
       {!hideComments && showComments && (
-        <div className="flex flex-col gap-3 pt-3 border-t border-[var(--color-border)]">
+        <div className="flex flex-col gap-3 pt-3 border-t border-(--color-border)">
           {/* Input komentar */}
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               value={commentInput}
               onChange={(e) => setCommentInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
               placeholder="Tulis komentar..."
               className="
-                flex-1 rounded-lg px-3 py-2 text-sm
-                bg-[var(--color-bg)]
-                border border-[var(--color-border)]
-                text-[var(--color-text-primary)]
-                placeholder:text-[var(--color-text-subtle)]
+                flex-1 min-w-0 rounded-lg px-3 py-2 text-sm
+                bg-(--color-bg)
+                border border-(--color-border)
+                text-(--color-text-primary)
+                placeholder:text-(--color-text-subtle)
                 focus:outline-none focus:ring-1 focus:ring-sky-500/50
                 transition-colors
               "
@@ -113,18 +113,18 @@ export const PostActions = ({ post, hideComments = false }: PostActionProps) => 
           </div>
 
           {commentError && (
-            <p className="text-[var(--color-error)] text-xs">{commentError}</p>
+            <p className="text-(--color-error) text-xs">{commentError}</p>
           )}
 
           {/* List komentar */}
           {isLoadingComments ? (
             <div className="flex flex-col gap-2">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-4 rounded-md bg-[var(--color-surface)] animate-pulse" />
+                <div key={i} className="h-4 rounded-md bg-(--color-surface) animate-pulse" />
               ))}
             </div>
           ) : comments.length === 0 ? (
-            <p className="text-[var(--color-text-muted)] text-sm text-center py-2">
+            <p className="text-(--color-text-muted) text-sm text-center py-2">
               Belum ada komentar. Jadilah yang pertama!
             </p>
           ) : (
@@ -134,8 +134,8 @@ export const PostActions = ({ post, hideComments = false }: PostActionProps) => 
                   key={comment.id}
                   className="
                     rounded-lg p-3 group
-                    bg-[var(--color-surface)] hover:bg-[var(--color-elevated)]
-                    border border-[var(--color-border-sub)] hover:border-[var(--color-border)]
+                    bg-(--color-surface) hover:bg-(--color-elevated)
+                    border border-(--color-border-sub) hover:border-(--color-border)
                     transition-colors duration-200
                   "
                 >
@@ -146,7 +146,7 @@ export const PostActions = ({ post, hideComments = false }: PostActionProps) => 
                     >
                       @{comment.author.username}
                     </Link>
-                    <span className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
+                    <span className="text-sm text-(--color-text-secondary) leading-relaxed">
                       {comment.content}
                     </span>
                   </div>

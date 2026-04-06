@@ -1,23 +1,24 @@
 // app/layout/MainLayout.tsx
-import { Outlet } from 'react-router-dom';
-import { Header }  from './Header';
-import { Sidebar } from './Sidebar';
+import { Outlet } from "react-router-dom";
+import { Header } from "./Header";
+import { Sidebar } from "./Sidebar";
+import { MobileBottomNav } from "./MobileBottomNav";
+import { LAYOUT } from "./layoutTokens";
 
 export const MainLayout = () => {
   return (
     <div className="min-h-screen bg-[var(--color-bg)] flex">
-
-      {/* Sidebar kiri — desktop only */}
       <Sidebar />
 
-      {/* Konten utama */}
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen min-w-0">
         <Header />
-        <main className="flex-1 max-w-2xl w-full mx-auto px-4 py-6">
+        <main
+          className={`flex-1 w-full ${LAYOUT.contentInner} py-6 ${LAYOUT.mainBottomPadding}`}
+        >
           <Outlet />
         </main>
+        <MobileBottomNav />
       </div>
-
     </div>
   );
 };

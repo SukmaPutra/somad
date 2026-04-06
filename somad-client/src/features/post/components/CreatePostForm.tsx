@@ -56,15 +56,15 @@ export const CreatePostForm = () => {
   return (
     <>
       {toast && (
-        <div className="fixed bottom-4 right-4 z-50">
+        <div className="fixed bottom-20 right-4 lg:bottom-4 z-50 max-w-[calc(100vw-2rem)]">
           <Toast key={toast.id} type={toast.type} message={toast.message} onClose={hideToast} />
         </div>
       )}
 
-      <Card padding="md" className="flex gap-3">
-        <Avatar src={user.photoURL} alt={user.displayName} size="md" />
+      <Card padding="md" className="flex gap-2 sm:gap-3 min-w-0">
+        <Avatar src={user.avatarUrl} alt={user.name} size="md" />
 
-        <form onSubmit={submit} className="flex-1 flex flex-col gap-3">
+        <form onSubmit={submit} className="flex-1 flex flex-col gap-3 min-w-0">
           {/* Textarea */}
           <textarea
             {...registerRest}
@@ -77,14 +77,14 @@ export const CreatePostForm = () => {
             rows={3}
             className="
               w-full bg-transparent resize-none overflow-hidden
-              text-[var(--color-text-primary)] text-sm
-              placeholder:text-[var(--color-text-subtle)]
+              text-(--color-text-primary) text-sm
+              placeholder:text-(--color-text-subtle)
               focus:outline-none
             "
           />
 
           {errors.content && (
-            <span className="text-[var(--color-error)] text-xs">{errors.content.message}</span>
+            <span className="text-(--color-error) text-xs">{errors.content.message}</span>
           )}
 
           {/* Preview gambar */}
@@ -93,7 +93,7 @@ export const CreatePostForm = () => {
               <img
                 src={preview}
                 alt="preview"
-                className="max-h-48 rounded-lg border border-[var(--color-border)] object-cover"
+                className="max-h-48 rounded-lg border border-(--color-border) object-cover"
               />
               <button
                 type="button"
@@ -113,7 +113,7 @@ export const CreatePostForm = () => {
           )}
 
           {/* Footer */}
-          <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)]">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pt-2 border-t border-(--color-border)">
             <div>
               <input
                 ref={fileRef}
@@ -127,7 +127,7 @@ export const CreatePostForm = () => {
                 onClick={() => fileRef.current?.click()}
                 aria-label="Upload gambar"
                 className="
-                  text-[var(--color-text-muted)] hover:text-sky-400
+                  text-(--color-text-muted) hover:text-sky-400
                   p-1.5 rounded-full hover:bg-sky-400/10
                   transition-colors
                 "
@@ -140,10 +140,10 @@ export const CreatePostForm = () => {
               <span className={`
                 text-xs tabular-nums transition-colors
                 ${isOverLimit
-                  ? 'text-[var(--color-error)] font-medium'
+                  ? 'text-(--color-error) font-medium'
                   : isNearLimit
-                    ? 'text-[var(--color-warning)]'
-                    : 'text-[var(--color-text-muted)]'
+                    ? 'text-(--color-warning)'
+                    : 'text-(--color-text-muted)'
                 }
               `}>
                 {content.length}/{LIMITS.POST_MAX_CHARS}

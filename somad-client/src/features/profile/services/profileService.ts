@@ -1,125 +1,111 @@
 // features/profile/services/profileService.ts
-import { doc, getDoc, getDocs, updateDoc, collection, query, where, orderBy, serverTimestamp, setDoc, deleteDoc, increment, limit } from "firebase/firestore";
-import { db } from "@/core/api/firebase/firebaseInit";
-import { withFirestore } from "@/core/api/interceptors";
 import { uploadImageToCloudinary } from "@/core/utils/cloudinaryService";
-import { FOLLOWS_COLLECTION, POSTS_COLLECTION } from "../constants/profileConstants";
 import type { EditProfilePayload } from "../types/profile.types";
 import type { UserProfile } from "@/features/auth/types/auth.types";
 import type { Post } from "@/features/post/types/post.types";
-import { USERS_COLLECTION } from "@/features/auth/constants/authConstants";
+import apiClient from "@/core/api/client";
 
-
-
-// ─── Get Profile by Username ──────────────────────────────────────────────────
+const ok = <T>(data: T) => ({ success: true as const, data, error: null as null });
+const fail = (error: string) => ({ success: false as const, data: null, error });
 
 export const getProfileByUsernameService = async (username: string) => {
-  return withFirestore(async () => {
-    const q = query(
-      collection(db, USERS_COLLECTION),
-      where('username', '==', username.toLowerCase())
-    );
-    const snap = await getDocs(q);
-    if (snap.empty) throw new Error('Pengguna tidak ditemukan.');
-    return snap.docs[0].data() as UserProfile;
-  });
-};
+  try {
+    const res = await apiClient.get<{
+      user: UserProfile;
+      isFollowing: boolean;
+    }>(`/users/${username}`);
 
-// ─── Get User Posts ───────────────────────────────────────────────────────────
-
-export const getUserPostsService = async (uid:string) => {
-    return withFirestore (async () => {
-        const snap = await getDocs(
-            query(
-                collection(db, POSTS_COLLECTION),
-                where('author.uid', '==', uid),
-                orderBy('createdAt', 'desc'), limit(20)
-            )
-        );
-        return snap.docs.map(d => ({ id: d.id, ...d.data() }) as Post)
-    })
-}
-
-// ─── Edit Profile ─────────────────────────────────────────────────────────────
-
-export const editProfileService = async (
-  uid: string,
-  payload: EditProfilePayload
-) => {
-  return withFirestore(async () => {
-    // Cek username baru apakah sudah dipakai user lain
-    if (payload.username) {
-      const q = query(
-        collection(db, USERS_COLLECTION),
-        where('username', '==', payload.username.toLowerCase())
-      );
-      const snap = await getDocs(q);
-      const takenByOther = snap.docs.some(d => d.id !== uid);
-      if (takenByOther) throw new Error('Username sudah digunakan.');
-    }
-
-    let photoURL: string | undefined;
-
-    // Upload foto baru kalau ada
-    if (payload.photoFile) {
-      photoURL = await uploadImageToCloudinary(payload.photoFile);
-    }
-
-    const updateData: Partial<UserProfile> = {
-      displayName: payload.displayName,
-      username:    payload.username.toLowerCase(),
-      bio:         payload.bio ?? '',
-      updatedAt:   serverTimestamp() as any,
-      ...(photoURL && { photoURL }),
+    return {
+      data: res.data.user,
+      isFollowing: res.data.isFollowing,
+      success: true,
+      error: null,
     };
-
-    await updateDoc(doc(db, USERS_COLLECTION, uid), updateData);
-    return updateData;
-  });
+  } catch (error: unknown) {
+    const err = error as { response?: { status?: number } };
+    const status = err?.response?.status;
+    const msg =
+      status === 404
+        ? "Pengguna tidak ditemukan."
+        : status === 401
+          ? "Sesi habis, silakan login ulang."
+          : "Gagal memuat profil.";
+    return {
+      data: null,
+      isFollowing: false,
+      success: false,
+      error: msg,
+    };
+  }
 };
 
-// ─── Follow ───────────────────────────────────────────────────────────────────
-
-// ID dokumen follow = "{followerId}_{followingId}"
-const followDocId = (followerId: string, followingId: string) => `${followerId}_${followingId}`;
-
-export const followUserService = async (followerId: string, followingId: string) => {
-    return withFirestore(async () => {
-        const followRef = doc(db, FOLLOWS_COLLECTION, followDocId(followerId, followingId));
-        const followerRef = doc(db, USERS_COLLECTION, followerId);
-        const followingRef = doc(db, USERS_COLLECTION, followingId);
-
-        await Promise.all([
-            setDoc(followRef, {
-                followerId,
-                followingId,
-                createdAt: serverTimestamp()
-            }),
-            updateDoc(followerRef, { followingCount: increment(1) }),
-            updateDoc(followingRef, { followersCount: increment(1) })
-        ])
-    })
-}
-
-export const unfollowUserService = async (followerId: string, followingId: string) => {
-    return withFirestore(async () => {
-        const followRef = doc(db, FOLLOWS_COLLECTION, followDocId(followerId, followingId));
-        const followerRef = doc(db, USERS_COLLECTION, followerId);
-        const followingRef = doc(db, USERS_COLLECTION, followingId);
-
-        await Promise.all([
-            deleteDoc(followRef),
-            updateDoc(followerRef, { followingCount: increment(-1) }),
-            updateDoc(followingRef, { followersCount: increment(-1) })
-        ])
-    })
-}
-
-export const checkIsFollowingService = async (followerId: string, followingId: string) => {
-    return withFirestore(async () => {
-        const snap = await getDoc(
-            doc(db, FOLLOWS_COLLECTION, followDocId(followerId, followingId))
-        );
-        return snap.exists();
+export const getUserPostsService = async (
+  username: string,
+  page: number,
+  limit: number
+) => {
+  try {
+    const res = await apiClient.get<{
+      posts: Post[];
+      pagination: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+        hasNextPage: boolean;
+      };
+    }>(`/users/${username}/posts`, {
+      params: { page, limit },
     });
+    return ok(res.data);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    return fail(err.message ?? "Gagal memuat postingan.");
+  }
+};
+
+export const editProfileService = async (payload: EditProfilePayload) => {
+  try {
+    let avatarUrl: string | undefined;
+    if (payload.photoFile) {
+      avatarUrl = await uploadImageToCloudinary(payload.photoFile);
+    }
+
+    const res = await apiClient.patch<{ message: string; user: UserProfile }>(
+      `/users/profile`,
+      {
+        name: payload.displayName,
+        username: payload.username,
+        bio: payload.bio ?? "",
+        ...(avatarUrl && { avatarUrl }),
+      }
+    );
+    return ok(res.data.user);
+  } catch (error: unknown) {
+    const err = error as { response?: { data?: { message?: string } }; message?: string };
+    const msg =
+      err?.response?.data?.message ??
+      err?.message ??
+      "Gagal memperbarui profil.";
+    return fail(typeof msg === "string" ? msg : "Gagal memperbarui profil.");
+  }
+};
+
+export const toggleFollowService = async (username: string) => {
+  try {
+    const res = await apiClient.post<{ following: boolean; message: string }>(
+      `/users/${username}/follow`
+    );
+    return { data: res.data, success: true, error: null };
+  } catch (err: unknown) {
+    const e = err as { response?: { status?: number } };
+    const status = e?.response?.status;
+    const msg =
+      status === 401
+        ? "Sesi habis, silakan login ulang."
+        : status === 400
+          ? "Tidak bisa follow pengguna ini."
+          : "Gagal memperbarui status follow.";
+    return { data: null, success: false, error: msg };
+  }
 };

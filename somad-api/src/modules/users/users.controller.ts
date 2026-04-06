@@ -2,29 +2,37 @@ import { Response } from "express";
 import { AuthRequest } from "../../shared/type";
 import { updateProfileSchema, usernameSchema, paginationSchema } from "./users.schema";
 import * as userService from './users.service';
+import { prisma } from "../../config/database";
 
-export const getUserByUsername = async (req:AuthRequest, res:Response) => {
-    try {
-
-        const parsed = usernameSchema.safeParse(req.params)
-        if(!parsed.success) {
-            res.status(400).json({message: parsed.error.issues[0].message})
-            return
-        }
-
-        const user = await userService.getUserByUsername(parsed.data.username)
-
-        if(!user) {
-            res.status(404).json({message: 'User tidak ditemukan'})
-            return
-        }
-
-        res.status(200).json({user})
-
-    } catch (error:any) {
-        res.status(500).json({message: error.message})
+export const getUserByUsername = async (req: AuthRequest, res: Response) => {
+  try {
+    const parsed = usernameSchema.safeParse(req.params);
+    if (!parsed.success) {
+      res.status(400).json({ message: parsed.error.issues[0].message });
+      return;
     }
-}
+
+    const user = await userService.getUserByUsername(parsed.data.username);
+    if (!user) {
+      res.status(404).json({ message: 'User tidak ditemukan' });
+      return;
+    }
+
+    // cek status follow
+    const followRecord = await prisma.follow.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId:  req.user!.id,
+          followingId: user.id,
+        },
+      },
+    });
+
+    res.status(200).json({ user, isFollowing: !!followRecord });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 export const getMyProfile = async (req:AuthRequest, res:Response) => {
     try {
@@ -121,7 +129,8 @@ export const getUserPosts = async (req: AuthRequest, res: Response) => {
     }
 
     const result = await userService.getUserPosts({
-      userId: targetUser.id,
+      authorId: targetUser.id,
+      viewerId: req.user!.id,
       ...pageParsed.data,
     })
 

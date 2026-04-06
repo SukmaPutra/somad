@@ -16,7 +16,7 @@ export const ProfilePage = () => {
     const { username } = useParams<{ username: string }>();
     const [isEditOpen, setIsEditOpen] = useState(false);
 
-    const { profile, posts, isLoading, isLoadingPosts, error , isOwnProfile} = useProfile(username ?? '');
+    const { profile, posts, isLoading, isLoadingPosts, error, isOwnProfile, refresh } = useProfile(username ?? '');
 
     if (!username) return <Navigate to={ROUTES.FEED} replace />;
 
@@ -52,8 +52,9 @@ export const ProfilePage = () => {
             {isOwnProfile && (
                 <EditProfileModal
                     isOpen={isEditOpen}
-                    onClose={()=> setIsEditOpen(false)}
+                    onClose={() => setIsEditOpen(false)}
                     profile={profile}
+                    onSaved={refresh}
                 />
             )}
         </div>
